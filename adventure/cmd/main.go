@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -30,19 +31,12 @@ func main() {
 	fmt.Print("Enter the number: ")
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		opt, err := strconv.Atoi(strings.TrimSpace(scanner.Text()))
+		nextArc, err := getNextArc(strings.TrimSpace(scanner.Text()), chapter)
 		if err != nil {
 			fmt.Print("Invalid input. Please reenter the number: ")
 			continue
 		}
 
-		// Check if user input within the range, option starts from 1 to number of options
-		if opt < 1 || opt > len(chapter.Options) {
-			fmt.Print("Invalid option. Please reenter the number: ")
-			continue
-		}
-
-		nextArc := chapter.Options[opt-1].Arc
 		chapter = m[nextArc]
 		printChapter(chapter)
 
@@ -72,6 +66,21 @@ func parseJSON(file *os.File) (map[string]Chapter, error) {
 	}
 
 	return chapters, nil
+}
+
+func getNextArc(text string, chapter Chapter) (string, error) {
+	opt, err := strconv.Atoi(text)
+	if err != nil {
+		return "", errors.New("invalid input")
+	}
+
+	// Check if user input within the range, option starts from 1 to number of options
+	if opt < 1 || opt > len(chapter.Options) {
+		return "", errors.New("out of range")
+	}
+
+	nextArc := chapter.Options[opt-1].Arc
+	return nextArc, nil
 }
 
 func printChapter(chapter Chapter) {
