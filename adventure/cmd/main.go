@@ -2,10 +2,9 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
+	util "gophercises/adventure"
 	"os"
 	"strconv"
 	"strings"
@@ -20,7 +19,7 @@ func main() {
 	defer file.Close()
 
 	// Parse json data to a map of Chapter
-	m, err := parseJSON(file)
+	m, err := util.ParseJSON(file)
 	if err != nil {
 		fmt.Println("Parse JSON error:", err)
 	}
@@ -53,22 +52,7 @@ func main() {
 	}
 }
 
-func parseJSON(file *os.File) (map[string]Chapter, error) {
-	jsonBytes, err := io.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	var chapters map[string]Chapter
-	err = json.Unmarshal(jsonBytes, &chapters)
-	if err != nil {
-		return nil, err
-	}
-
-	return chapters, nil
-}
-
-func getNextArc(text string, chapter Chapter) (string, error) {
+func getNextArc(text string, chapter util.Chapter) (string, error) {
 	opt, err := strconv.Atoi(text)
 	if err != nil {
 		return "", errors.New("invalid input")
@@ -83,7 +67,7 @@ func getNextArc(text string, chapter Chapter) (string, error) {
 	return nextArc, nil
 }
 
-func printChapter(chapter Chapter) {
+func printChapter(chapter util.Chapter) {
 	fmt.Println("--------------------------------------")
 	fmt.Println(chapter.Title)
 	fmt.Println("--------------------------------------")
@@ -93,15 +77,4 @@ func printChapter(chapter Chapter) {
 	for i, s := range chapter.Options {
 		fmt.Println(i+1, " - ", s.Text)
 	}
-}
-
-type Chapter struct {
-	Title   string   `json:"title"`
-	Story   []string `json:"story"`
-	Options []Option `json:"options"`
-}
-
-type Option struct {
-	Text string `json:"text"`
-	Arc  string `json:"arc"`
 }
