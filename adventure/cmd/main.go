@@ -3,23 +3,26 @@ package main
 import (
 	"bufio"
 	"errors"
+	"flag"
 	"fmt"
-	util "gophercises/adventure"
+	cyoa "gophercises/adventure"
 	"os"
 	"strconv"
 	"strings"
 )
 
 func main() {
+	filename := flag.String("file", "gopher.json", "JSON file for CYOA")
+
 	// Open json file
-	file, err := os.Open("gopher.json")
+	file, err := os.Open(*filename)
 	if err != nil {
 		fmt.Println("Open file error:", err)
 	}
 	defer file.Close()
 
 	// Parse json data to a map of Chapter
-	m, err := util.ParseJSON(file)
+	m, err := cyoa.ParseJSON(file)
 	if err != nil {
 		fmt.Println("Parse JSON error:", err)
 	}
@@ -52,7 +55,7 @@ func main() {
 	}
 }
 
-func getNextArc(text string, chapter util.Chapter) (string, error) {
+func getNextArc(text string, chapter cyoa.Chapter) (string, error) {
 	opt, err := strconv.Atoi(text)
 	if err != nil {
 		return "", errors.New("invalid input")
@@ -67,7 +70,7 @@ func getNextArc(text string, chapter util.Chapter) (string, error) {
 	return nextArc, nil
 }
 
-func printChapter(chapter util.Chapter) {
+func printChapter(chapter cyoa.Chapter) {
 	fmt.Println("--------------------------------------")
 	fmt.Println(chapter.Title)
 	fmt.Println("--------------------------------------")
