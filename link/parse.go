@@ -1,7 +1,6 @@
 package link
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -43,7 +42,6 @@ func text(n *html.Node) string {
 
 	var ret string
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		fmt.Println(c)
 		ret += text(c) + " "
 	}
 
