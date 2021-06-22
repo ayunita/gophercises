@@ -2,6 +2,8 @@ package db
 
 import (
 	"encoding/binary"
+	"encoding/json"
+	"time"
 
 	"github.com/boltdb/bolt"
 )
@@ -31,7 +33,13 @@ func (h *Handler) Write(bucketName string, s string) error {
 	return h.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
 		id, _ := b.NextSequence()
-		err := b.Put(itob(int(id)), []byte(s))
+
+		t := Task{Key: int(id), Value: s, Done: false}
+		bytes, err := json.Marshal(t)
+		if err != nil {
+			return err
+		}
+		err = b.Put(itob(int(id)), bytes)
 		if err != nil {
 			return err
 		}
@@ -39,16 +47,42 @@ func (h *Handler) Write(bucketName string, s string) error {
 	})
 }
 
-func (h *Handler) List(bucketName string) ([]Task, error) {
+func (h *Handler) MarkDone(bucketName string, key int) error {
+	return h.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketName))
+
+		temp := b.Get(itob(key))
+		t := Task{}
+		err := json.Unmarshal(temp, &t)
+		t.Done = true
+		t.Timestamp = time.Now()
+		if err != nil {
+			return err
+		}
+		bytes, err := json.Marshal(t)
+		if err != nil {
+			return err
+		}
+		err = b.Put(itob(key), bytes)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+func (h *Handler) List(bucketName string, isCompleted bool) ([]Task, error) {
 	var ret []Task
 	err := h.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
 		c := b.Cursor()
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			ret = append(ret, Task{
-				Key:   btoi(k),
-				Value: string(v),
-			})
+			t := Task{}
+			if err := json.Unmarshal(v, &t); err == nil {
+				if t.Done == isCompleted {
+					ret = append(ret, t)
+				}
+			}
 		}
 		return nil
 	})
@@ -96,6 +130,8 @@ func btoi(b []byte) int {
 }
 
 type Task struct {
-	Key   int
-	Value string
+	Key       int
+	Value     string
+	Done      bool
+	Timestamp time.Time
 }

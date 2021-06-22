@@ -17,13 +17,13 @@ var listCmd = &cobra.Command{
 			fmt.Println("Cannot open the database. Error:", err)
 		}
 
-		tasks, err := h.List(bucketName)
+		tasks, err := h.List(bucketName, false)
 		if err != nil {
 			fmt.Println("Cannot open the tasks. Error:", err)
 		}
 
 		for i, t := range tasks {
-			fmt.Println(i+1, t.Value)
+			fmt.Println(i+1, "-", t.Value)
 		}
 
 		h.CloseDB()
