@@ -117,8 +117,7 @@ func TestShuffle(t *testing.T) {
 func TestFYShuffle(t *testing.T) {
 	cards := New()
 	before := append([]Card(nil), cards...)
-	FYShuffle(cards)
-	after := cards
+	after := FYShuffle(cards)
 	if reflect.DeepEqual(before, after) {
 		t.Error("Before and after must be different")
 	}

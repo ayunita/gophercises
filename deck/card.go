@@ -104,13 +104,14 @@ func Shuffle(cards []Card) []Card {
 }
 
 // Fisher-Yates shuffle
-func FYShuffle(cards []Card) {
+func FYShuffle(cards []Card) []Card {
 	N := len(cards)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < N; i++ {
 		swapIndex := i + r.Intn(N-i)
 		cards[swapIndex], cards[i] = cards[i], cards[swapIndex]
 	}
+	return cards
 }
 
 func Jokers(n int) func([]Card) []Card {
