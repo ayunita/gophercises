@@ -52,18 +52,29 @@ func rename(path string, filename string) error {
 // E.g. test_001.txt -> Test 001.txt
 func Pretty(filename string) string {
 	// Case name_NNN.ext
-	re := regexp.MustCompile(`(_[0-9]+)`)
+	re := regexp.MustCompile(`(_[0-9]+)|(\(([0-9] of [0-9].)\))`)
+	bOrder := re.Find([]byte(filename))
+	order := string(bOrder)
+	var n string
+	switch {
+	case strings.ContainsAny(order, "_"):
+		numbering := strings.Split(order, "_")
+		n = strings.TrimSpace(numbering[1])
+	case strings.ContainsAny(order, "of"):
+		numbering := strings.Split(order, "of")
+		n = strings.TrimSpace(numbering[0][1:])
+	default:
+		n = ""
+	}
 	s := re.Split(filename, -1)
-	name := strings.Title(s[0])
+	name := strings.TrimSpace(strings.Title(s[0]))
 	ext := s[1]
-	order := re.Find([]byte(filename))
-	n := strings.Split(string(order), "_")
 
 	var b bytes.Buffer
 	b.WriteString(name) // new filename
 	b.WriteString(" ")
-	b.WriteString(n[1]) // ordering number
-	b.WriteString(ext)  // extension
+	b.WriteString(n)   // ordering number
+	b.WriteString(ext) // extension
 
 	return b.String()
 }

@@ -11,6 +11,8 @@ func TestPretty(t *testing.T) {
 		{"good_morning_1.txt", "Good_morning 1.txt"},
 		{"Hello world_004.txt", "Hello World 004.txt"},
 		{"12931_004.txt", "12931 004.txt"},
+		{"good morning (1 of 10).txt", "Good Morning 1.txt"},
+		{"good_morning_(5 of 10).txt", "Good_morning_ 5.txt"},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.input, func(t *testing.T) {
